@@ -1,0 +1,10 @@
+#1 Конвертация видео в аудио
+from moviepy.editor import VideoFileClip
+
+def convert_video_to_audio(video_file, output_audio_file):
+    video = VideoFileClip(video_file)
+    audio = video.audio
+    audio.write_audiofile(output_audio_file)
+
+# Usage
+convert_video_to_audio('0.mp4', 'my_audio.mp3')
