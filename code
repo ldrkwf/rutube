@@ -1,10 +1,36 @@
-#1 Конвертация видео в аудио
-from moviepy.editor import VideoFileClip
+import whisper
+import torch
+from googletrans import Translator
+from gtts import gTTS
+import moviepy.editor as mp
 
-def convert_video_to_audio(video_file, output_audio_file):
-    video = VideoFileClip(video_file)
-    audio = video.audio
-    audio.write_audiofile(output_audio_file)
+# Load the models
+model = whisper.load_model("large")
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
-# Usage
-convert_video_to_audio('0.mp4', 'my_audio.mp3')
+# Load the video
+clip = mp.VideoFileClip("input.mp4")
+
+# Extract the audio
+clip.audio.write_audiofile("audio.wav")
+
+# Load the audio
+whisper.load_audio("audio.wav")
+
+# Transcribe the audio
+transcription = model.transcribe("audio.wav", fp16=False, language='ru')
+
+# Translate the transcription
+translator = Translator()
+translation = translator.translate(transcription['text'], dest='en')
+
+# Convert the translation to speech
+tts = gTTS(text=translation.text, lang='en')
+tts.save("audio_en.mp3")
+
+# Replace the audio in the video
+audio_clip = mp.AudioFileClip("audio_en.mp3")
+final_clip = clip.set_audio(audio_clip)
+
+# Save the final video
+final_clip.write_videofile("output.mp4")
